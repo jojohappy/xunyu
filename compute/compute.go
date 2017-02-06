@@ -3,8 +3,9 @@ package compute
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
+
+	"github.com/Shopify/sarama"
 
 	"github.com/xunyu/utils"
 )
@@ -137,10 +138,14 @@ func convert2Accesslog(accesslogKafka AccesslogKafka, uuid string) Accesslog {
 	return accesslog
 }
 
-func Aggregate(in <-chan string) {
+func Aggregate(in <-chan *sarama.ConsumerMessage) {
 	for s := range in {
 		var accesslogKafka AccesslogKafka
-		json.NewDecoder(strings.NewReader(s)).Decode(&accesslogKafka)
+		err := json.Unmarshal([]byte(s), &accesslogKafka)
+		if err != nil {
+			fmt.Println("parse accesslog:", s, "fail:", err)
+			continue
+		}
 		uuid := accesslogKafka.Host + "" + parseDatetime(accesslogKafka.Time)
 		if el := buffer.Find(func(v interface{}) bool {
 			var accesslog Accesslog = v.(Accesslog)
@@ -164,7 +169,7 @@ func Aggregate(in <-chan string) {
 	}
 }
 
-func Resolve(data <-chan string) <-chan interface{} {
+func Resolve(data <-chan *sarama.ConsumerMessage) <-chan interface{} {
 	out := make(chan interface{})
 	go Aggregate(data)
 	go func() {

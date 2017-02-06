@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
+	"os"
+
 	"github.com/xunyu/compute"
 	"github.com/xunyu/sender"
-	"os"
 )
 
 func gen() <-chan string {
@@ -25,8 +26,5 @@ func gen() <-chan string {
 func main() {
 	in := gen()
 	out := compute.Resolve(in)
-
-	for {
-		sender.Send(out)
-	}
+	sender.Send(out)
 }
