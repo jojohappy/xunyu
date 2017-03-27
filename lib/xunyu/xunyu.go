@@ -1,11 +1,11 @@
 package xunyu
 
 import (
-    "fmt"
-    "sync"
+	"fmt"
+	"sync"
 
-    "github.com/xunyu/config"
 	"github.com/xunyu/common"
+	"github.com/xunyu/config"
 	"github.com/xunyu/lib/plugins"
 )
 
@@ -13,7 +13,7 @@ type Xunyu struct {
 	Path    string
 	Config  XunyuConfig
 	Version string
-    Plugins *common.Plugins
+	Plugins *common.Plugins
 }
 
 type XunyuConfig struct {
@@ -54,7 +54,7 @@ func (xy *Xunyu) init() error {
 		return err
 	}
 
-    xy.Plugins = p
+	xy.Plugins = p
 	return nil
 }
 
@@ -73,87 +73,85 @@ func (xy *Xunyu) configure() error {
 }
 
 func (xy *Xunyu) Run() error {
-    in := runInput(xy.Plugins.Inputs)
-    ch := runChannel(xy.Plugins.Channels, in)
-    runOutput(xy.Plugins.Outputs, ch)
+	in := runInput(xy.Plugins.Inputs)
+	ch := runChannel(xy.Plugins.Channels, in)
+	runOutput(xy.Plugins.Outputs, ch)
 	return nil
 }
 
-func runInput(inputs []common.Plugin) <-chan common.DataStr {
-    fmt.Println("Starting Input")
-    defer fmt.Println("Stopped Input")
+func runInput(inputs []common.Plugin) <-chan common.DataInter {
+	fmt.Println("Starting Input")
 
-    out := make(chan common.DataStr, 1)
+	out := make(chan common.DataInter, 1)
 
-    var wg sync.WaitGroup
-    wg.Add(len(inputs))
-    for _, p := range inputs {
-        go func(p common.Plugin) {
-            defer wg.Done()
-            o := p.Plugin.Start()
-            for d := range o {
-                out <- d
-            }
-        }(p)
-    }
+	var wg sync.WaitGroup
+	wg.Add(len(inputs))
+	for _, p := range inputs {
+		go func(p common.Plugin) {
+			defer wg.Done()
+			o := p.Plugin.Start()
+			for d := range o {
+				out <- d
+			}
+		}(p)
+	}
 
-    go func() {
-        wg.Wait()
-        close(out)
-    }()
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
 
-    return out
+	return out
 }
 
-func runChannel(channels []common.Plugin, cs ...<-chan common.DataStr) <-chan common.DataStr {
-    fmt.Println("Starting Channel")
-    defer fmt.Println("Stoped Channel")
+func runChannel(channels []common.Plugin, cs ...<-chan common.DataInter) <-chan common.DataStr {
+	fmt.Println("Starting Channel")
 
-    out := make(chan common.DataStr, 1)
-    var wg sync.WaitGroup
+	out := make(chan common.DataStr, 1)
+	var wg sync.WaitGroup
 
-    filter := func(c <-chan common.DataStr) {
-        defer wg.Done()
-        for _, p := range channels {
-            o := p.Plugin.Filter(c)
-            for d := range o {
-                out <- d
-            }
-        }
-    }
+	filter := func(c <-chan common.DataInter) {
+		defer wg.Done()
+		for _, p := range channels {
+			o := p.Plugin.Filter(c)
+			for d := range o {
+				out <- d
+			}
+		}
+	}
 
-    wg.Add(len(cs))
-    for _, c := range cs {
-        go filter(c)
-    }
+	wg.Add(len(cs))
+	for _, c := range cs {
+		go filter(c)
+	}
 
-    go func() {
-        wg.Wait()
-        close(out)
-    }()
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
 
-    return out
+	return out
 }
 
 func runOutput(outputs []common.Plugin, cs ...<-chan common.DataStr) {
-    fmt.Println("Starting Output")
-    defer fmt.Println("Stopped Output")
+	fmt.Println("Starting Output")
+	defer fmt.Println("Stopped Output")
 
-    var wg sync.WaitGroup
+	var wg sync.WaitGroup
 
-    output := func(c <-chan common.DataStr) {
-        defer wg.Done()
-        for d := range c {
-            for _, p := range outputs {
-                p.Plugin.Output(d)
-            }
-        }
-    }
+	output := func(c <-chan common.DataStr) {
+		defer wg.Done()
+		for d := range c {
+			for _, p := range outputs {
+				p.Plugin.Output(d)
+			}
+		}
+	}
 
-    wg.Add(len(cs))
-    for _, c := range cs {
-        go output(c)
-    }
+	wg.Add(len(cs))
+	for _, c := range cs {
+		go output(c)
+	}
 
-    wg.Wait()
+	wg.Wait()
 }
