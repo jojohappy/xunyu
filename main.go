@@ -1,15 +1,15 @@
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
 
-    "github.com/xunyu/lib/xunyu"
+	"github.com/xunyu/lib/xunyu"
 )
 
 func main() {
-    if err := xunyu.Run(); nil != err {
-        fmt.Println(err)
-        os.Exit(1)
-    }
+	if err := xunyu.Run(); nil != err {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
