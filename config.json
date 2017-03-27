@@ -1,0 +1,17 @@
+{
+  "inputs": {
+    "file": {
+      "path": "/tmp/log.log",
+      "follow": true
+    }
+  },
+  "outputs": {
+    "console": {
+      "pretty": true
+    }
+  },
+  "channels": {
+    "json": {
+    }
+  }
+}
