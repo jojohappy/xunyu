@@ -41,12 +41,12 @@ func parseConfig(from interface{}) (*Config, error) {
 	case reflect.TypeOf((map[string]interface{})(nil)):
 		return parseMap(reflectFrom)
 	default:
-        switch reflectFrom.Kind() {
-        case reflect.Map:
-            return parseMap(reflectFrom)
-        default:
-            fmt.Println("error type")
-        }
+		switch reflectFrom.Kind() {
+		case reflect.Map:
+			return parseMap(reflectFrom)
+		default:
+			fmt.Println("error type")
+		}
 	}
 	return nil, nil
 }

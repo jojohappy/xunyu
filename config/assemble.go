@@ -2,7 +2,7 @@ package config
 
 import (
 	"reflect"
-    "strings"
+	"strings"
 )
 
 func (c *Config) Assemble(to interface{}) error {
@@ -24,7 +24,7 @@ func assembleStruct(to reflect.Value, cfg *Config) error {
 		stField := to.Type().Field(i)
 		vField := to.Field(i)
 		name := stField.Tag.Get("config")
-        fieldName := getFieldName(name, stField.Name)
+		fieldName := getFieldName(name, stField.Name)
 		val, err := cfg.GetValue(fieldName)
 		if nil != err {
 			continue
@@ -38,20 +38,20 @@ func assembleStruct(to reflect.Value, cfg *Config) error {
 			sub, _ := val.toConfig()
 			assembleStruct(vField, sub)
 		default:
-            t := vField.Type()
+			t := vField.Type()
 			v, err := assembleValue(t, val)
 			if nil != err {
 				return err
 			}
-            for t != v.Type() {
-                if !v.CanAddr() {
-                    tmp := reflect.New(v.Type())
-                    tmp.Elem().Set(v)
-                    v = tmp
-                } else {
-                    v = v.Addr()
-                }
-            }
+			for t != v.Type() {
+				if !v.CanAddr() {
+					tmp := reflect.New(v.Type())
+					tmp.Elem().Set(v)
+					v = tmp
+				} else {
+					v = v.Addr()
+				}
+			}
 			vField.Set(v)
 		}
 	}
@@ -123,8 +123,8 @@ func assembleValue(t reflect.Type, val value) (reflect.Value, error) {
 }
 
 func getFieldName(tagName string, fieldName string) string {
-    if "" != tagName {
-        return tagName
-    }
-    return strings.ToLower(fieldName)
+	if "" != tagName {
+		return tagName
+	}
+	return strings.ToLower(fieldName)
 }
