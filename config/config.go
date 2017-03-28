@@ -97,6 +97,13 @@ func parseTypePointers(t reflect.Type) reflect.Type {
 	return t
 }
 
+func parseValuePointers(v reflect.Value) reflect.Value {
+	for v.Kind() == reflect.Ptr && !v.IsNil() {
+		v = v.Elem()
+	}
+	return v
+}
+
 func parseValue(v reflect.Value) (value, error) {
 	v = parseValueInterfaces(v)
 	switch v.Kind() {

@@ -39,7 +39,7 @@ func assembleStruct(to reflect.Value, cfg *Config) error {
 			assembleStruct(vField, sub)
 		default:
 			t := vField.Type()
-			v, err := assembleValue(t, val)
+			v, err := assembleValue(t, val, vField)
 			if nil != err {
 				return err
 			}
@@ -65,8 +65,9 @@ func assembleMap(to reflect.Value, cfg *Config) error {
 	}
 	for key, value := range fields {
 		k := reflect.ValueOf(key)
+		old := to.MapIndex(k)
 		var v reflect.Value
-		v, err := assembleValue(to.Type().Elem(), value)
+		v, err := assembleValue(to.Type().Elem(), value, old)
 		if nil != err {
 			return err
 		}
@@ -75,7 +76,7 @@ func assembleMap(to reflect.Value, cfg *Config) error {
 	return nil
 }
 
-func assembleValue(t reflect.Type, val value) (reflect.Value, error) {
+func assembleValue(t reflect.Type, val value, old reflect.Value) (reflect.Value, error) {
 	t = parseTypePointers(t)
 	if tConfig.ConvertibleTo(t) {
 		cfg, err := val.toConfig()
@@ -86,40 +87,46 @@ func assembleValue(t reflect.Type, val value) (reflect.Value, error) {
 		v := reflect.ValueOf(cfg).Convert(reflect.PtrTo(t))
 		return v, nil
 	}
+	old = parseValuePointers(old)
 
 	switch t.Kind() {
 	case reflect.Bool:
 		b, err := val.toBool()
 		if nil != err {
-			return reflect.Value{}, nil
+			return reflect.Value{}, err
 		}
 		return reflect.ValueOf(b), nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		i, err := val.toInt()
 		if nil != err {
-			return reflect.Value{}, nil
+			return reflect.Value{}, err
 		}
 		return reflect.ValueOf(i).Convert(t), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		u, err := val.toUint()
 		if nil != err {
-			return reflect.Value{}, nil
+			return reflect.Value{}, err
 		}
 		return reflect.ValueOf(u).Convert(t), nil
 	case reflect.Float32, reflect.Float64:
 		f, err := val.toFloat()
 		if nil != err {
-			return reflect.Value{}, nil
+			return reflect.Value{}, err
 		}
 		return reflect.ValueOf(f).Convert(t), nil
 	case reflect.String:
 		s, err := val.toString()
 		if nil != err {
-			return reflect.Value{}, nil
+			return reflect.Value{}, err
 		}
 		return reflect.ValueOf(s), nil
+	case reflect.Struct:
+		sub, _ := val.toConfig()
+		assembleStruct(old, sub)
+		return old, nil
 	}
-	return reflect.Value{}, nil
+
+	return reflect.ValueOf(nil), nil
 }
 
 func getFieldName(tagName string, fieldName string) string {

@@ -38,5 +38,45 @@ func TestAssembleConfig(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to unpack: %v", err)
 		}
+		t.Logf("test unpack primitives(%v) into: %v", i, out)
+	}
+}
+
+func TestAssembleConfigNested(t *testing.T) {
+	tests := []interface{}{
+		&struct {
+			B bool
+			S struct {
+				I int
+				U uint
+			}
+		}{},
+		&struct {
+			B *bool
+			S *struct {
+				I *int
+				U *uint
+			}
+		}{S: &struct{
+			I *int
+			U *uint
+		}{}},
+	}
+
+	c, _ := parseConfig(node{
+		"b": true,
+		"s": node{
+			"i": 42,
+			"u": 23,
+		},
+	})
+
+	for i, out := range tests {
+		t.Logf("test unpack primitives(%v) into: %v", i, out)
+		err := c.Assemble(out)
+		if err != nil {
+			t.Fatalf("failed to unpack: %v", err)
+		}
+		t.Logf("test unpack primitives(%v) into: %v", i, out)
 	}
 }
