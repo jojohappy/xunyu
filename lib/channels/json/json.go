@@ -3,7 +3,6 @@ package json
 import (
 	"bytes"
 	"encoding/json"
-	"sync"
 
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
@@ -11,6 +10,7 @@ import (
 
 type jsonFilter struct {
 	common.PluginPrototype
+	c chan common.DataInter
 }
 
 func init() {
@@ -21,35 +21,29 @@ func New(_ *config.Config) (common.Pluginer, error) {
 	return &jsonFilter{}, nil
 }
 
-func (j *jsonFilter) Filter(cs ...<-chan common.DataInter) <-chan common.DataStr {
-	out := make(chan common.DataStr, 1)
-
-	var wg sync.WaitGroup
-	filter := func(c <-chan common.DataInter) {
-		defer wg.Done()
-		j.filterJson(c, out)
-	}
-
-	wg.Add(len(cs))
-	for _, c := range cs {
-		go filter(c)
-	}
-
+func (j *jsonFilter) Filter(out chan<- common.DataStr) error {
+	j.c = make(chan common.DataInter, 1)
 	go func() {
-		wg.Wait()
-		close(out)
+		for {
+			select {
+			case data := <-j.c:
+				out <- j.filterJson(data)
+			}
+		}
 	}()
-	return out
+	return nil
 }
 
-func (j *jsonFilter) filterJson(c <-chan common.DataInter, out chan<- common.DataStr) {
-	for data := range c {
-		var b bytes.Buffer
-		var ds map[string]interface{}
+func (j *jsonFilter) filterJson(data common.DataInter) common.DataStr {
+	var b bytes.Buffer
+	var ds map[string]interface{}
 
-		b.Write([]byte(data.(string)))
-		json.Unmarshal(b.Bytes(), &ds)
+	b.Write([]byte(data.(string)))
+	json.Unmarshal(b.Bytes(), &ds)
 
-		out <- common.DataStr(ds)
-	}
+	return common.DataStr(ds)
+}
+
+func (j *jsonFilter) GetFilterChannel() chan<- common.DataInter {
+	return j.c
 }

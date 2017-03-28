@@ -8,7 +8,8 @@ type Pluginer interface {
 	Close() error
 	Start() <-chan DataInter
 	Output(data DataStr) error
-	Filter(in ...<-chan DataInter) <-chan DataStr
+	Filter(out chan<- DataStr) error
+	GetFilterChannel() chan<- DataInter
 }
 
 type PluginBuilder func(config *config.Config) (Pluginer, error)
@@ -116,6 +117,10 @@ func (*PluginPrototype) Output(data DataStr) error {
 	return nil
 }
 
-func (*PluginPrototype) Filter(in ...<-chan DataInter) <-chan DataStr {
+func (*PluginPrototype) Filter(out chan<- DataStr) error {
+	return nil
+}
+
+func (*PluginPrototype) GetFilterChannel() chan<- DataInter {
 	return nil
 }

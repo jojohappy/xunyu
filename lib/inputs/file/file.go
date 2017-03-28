@@ -1,6 +1,8 @@
 package file
 
 import (
+	"fmt"
+
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
 
@@ -61,13 +63,18 @@ func (f *file) newTailConfig() (tail.Config, error) {
 func (f *file) Start() <-chan common.DataInter {
 	out := make(chan common.DataInter, 1)
 	cfg, err := f.newTailConfig()
-
 	if nil != err {
+		fmt.Println(err)
 		close(out)
 		return out
 	}
 
 	t, err := tail.TailFile(f.config.Path, cfg)
+	if nil != err {
+		fmt.Println(err)
+		close(out)
+		return out
+	}
 
 	go func() {
 		for line := range t.Lines {

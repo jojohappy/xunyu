@@ -78,6 +78,7 @@ func (k *kafka) Start() <-chan common.DataInter {
 	cfg, err := k.newKafkaConfig()
 
 	if nil != err {
+		fmt.Println(err)
 		close(out)
 		return out
 	}
@@ -85,6 +86,7 @@ func (k *kafka) Start() <-chan common.DataInter {
 	consumer, err := newKafkaClient(cfg, k.config.Zookeeper, k.config.Topics, k.config.GroupId)
 
 	if nil != err {
+		fmt.Println(err)
 		close(out)
 		return out
 	}
