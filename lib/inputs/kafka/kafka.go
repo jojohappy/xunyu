@@ -99,8 +99,6 @@ func (k *kafka) Start() <-chan common.DataInter {
 				consumer.CommitUpto(msg)
 			}
 		}
-
-		close(out)
 	}()
 	return out
 }

@@ -24,12 +24,10 @@ func New(_ *config.Config) (common.Pluginer, error) {
 func (j *jsonFilter) Filter(out chan<- common.DataStr) error {
 	j.c = make(chan common.DataInter, 1)
 	go func() {
-		for {
-			select {
-			case data := <-j.c:
-				out <- j.filterJson(data)
-			}
+		for data := range j.c {
+			out <- j.filterJson(data)
 		}
+		close(out)
 	}()
 	return nil
 }

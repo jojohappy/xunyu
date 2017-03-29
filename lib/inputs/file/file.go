@@ -77,11 +77,12 @@ func (f *file) Start() <-chan common.DataInter {
 	}
 
 	go func() {
-		for line := range t.Lines {
-			out <- line.Text
+		for {
+			select {
+			case line := <-t.Lines:
+				out <- line.Text
+			}
 		}
-
-		close(out)
 	}()
 	return out
 }
