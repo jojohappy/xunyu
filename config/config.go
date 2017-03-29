@@ -35,6 +35,10 @@ func Load(path string) (*Config, error) {
 	return parseConfig(c)
 }
 
+func From(from interface{}) (*Config, error) {
+	return parseConfig(from)
+}
+
 func parseConfig(from interface{}) (*Config, error) {
 	reflectFrom := reflect.ValueOf(from)
 	switch t := reflectFrom.Type(); t {
