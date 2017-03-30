@@ -25,7 +25,7 @@ func assembleStruct(to reflect.Value, cfg *Config) error {
 		vField := to.Field(i)
 		name := stField.Tag.Get("config")
 		fieldName := getFieldName(name, stField.Name)
-		val, err := cfg.GetValue(fieldName)
+		val, err := cfg.GetDictValue(fieldName)
 		if nil != err {
 			continue
 		}
@@ -37,6 +37,12 @@ func assembleStruct(to reflect.Value, cfg *Config) error {
 		case reflect.Struct:
 			sub, _ := val.toConfig()
 			assembleStruct(vField, sub)
+		case reflect.Slice:
+			sub, _ := val.toConfig()
+			err := assembleSlice(vField, sub.arr)
+			if nil != err {
+				return err
+			}
 		default:
 			t := vField.Type()
 			v, err := assembleValue(t, val, vField)
@@ -59,7 +65,7 @@ func assembleStruct(to reflect.Value, cfg *Config) error {
 }
 
 func assembleMap(to reflect.Value, cfg *Config) error {
-	fields := cfg.content
+	fields := cfg.dict
 	if to.IsNil() {
 		to.Set(reflect.MakeMap(to.Type()))
 	}
@@ -134,4 +140,18 @@ func getFieldName(tagName string, fieldName string) string {
 		return tagName
 	}
 	return strings.ToLower(fieldName)
+}
+
+func assembleSlice(to reflect.Value, arr []value) error {
+	if to.IsNil() {
+		to.Set(reflect.MakeSlice(to.Type(), len(arr), len(arr)))
+	}
+
+	for i, from := range arr {
+		_, err := assembleValue(to.Type().Elem(), from, to.Index(i))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

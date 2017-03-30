@@ -64,6 +64,10 @@ func newString(s string) *cfgString {
 	return &cfgString{s}
 }
 
+func newCfgSub(c *Config) *cfgSub {
+	return &cfgSub{c}
+}
+
 func (cfgBool) toConfig() (*Config, error)   { return nil, ErrTypeMismatch }
 func (c *cfgBool) toBool() (bool, error)     { return c.b, nil }
 func (c *cfgBool) toString() (string, error) { return fmt.Sprintf("%t", c.b), nil }

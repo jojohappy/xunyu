@@ -9,7 +9,8 @@ import (
 )
 
 type Config struct {
-	content map[string]value
+	dict map[string]value
+	arr []value
 }
 
 var (
@@ -17,7 +18,7 @@ var (
 )
 
 func New() *Config {
-	return &Config{}
+	return &Config{nil, nil}
 }
 
 func Load(path string) (*Config, error) {
@@ -63,10 +64,10 @@ func parseMap(from reflect.Value) (*Config, error) {
 		if nil != err {
 			return nil, err
 		}
-		if nil == cfg.content {
-			cfg.content = map[string]value{}
+		if nil == cfg.dict {
+			cfg.dict = map[string]value{}
 		}
-		cfg.content[field] = v
+		cfg.dict[field] = v
 	}
 	return cfg, nil
 }
@@ -126,18 +127,36 @@ func parseValue(v reflect.Value) (value, error) {
 		return newFloat(f), nil
 	case reflect.String:
 		return newString(v.String()), nil
-	// case reflect.Array, reflect.Slice:
-	//     return normalizeArray(v)
+	case reflect.Array, reflect.Slice:
+	    return parseSlice(v)
 	case reflect.Map:
 		return parseMapValue(v)
 	}
 	return nil, nil
 }
 
-func (c *Config) GetValue(name string) (value, error) {
-	if val, ok := c.content[name]; ok {
+func (c *Config) GetDictValue(name string) (value, error) {
+	if val, ok := c.dict[name]; ok {
 		return val, nil
 	} else {
 		return nil, errors.New("missing field")
 	}
+}
+
+func parseSlice(from reflect.Value) (value, error) {
+	l := from.Len()
+	arr := make([]value, 0, l)
+	cfg := New()
+
+	for i := 0; i < l; i++ {
+		tmp, err := parseValue(from.Index(i))
+		if nil != err {
+			return nil, err
+		}
+		arr = append(arr, tmp)
+	}
+
+	cfg.arr = arr
+	val := newCfgSub(cfg)
+	return val, nil
 }

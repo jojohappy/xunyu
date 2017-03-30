@@ -33,12 +33,12 @@ func TestAssembleConfig(t *testing.T) {
 	})
 
 	for i, out := range tests {
-		t.Logf("test unpack primitives(%v) into: %v", i, out)
+		t.Logf("test unpack config(%v) into: %v", i, out)
 		err := c.Assemble(out)
 		if err != nil {
 			t.Fatalf("failed to unpack: %v", err)
 		}
-		t.Logf("test unpack primitives(%v) into: %v", i, out)
+		t.Logf("test unpack config(%v) into: %v", i, out)
 	}
 }
 
@@ -72,11 +72,44 @@ func TestAssembleConfigNested(t *testing.T) {
 	})
 
 	for i, out := range tests {
-		t.Logf("test unpack primitives(%v) into: %v", i, out)
+		t.Logf("test unpack config nested (%v) into: %v", i, out)
 		err := c.Assemble(out)
 		if err != nil {
 			t.Fatalf("failed to unpack: %v", err)
 		}
-		t.Logf("test unpack primitives(%v) into: %v", i, out)
+		t.Logf("test unpack config nested (%v) into: %v", i, out)
+	}
+}
+
+func TestAssembleConfigSlice(t *testing.T) {
+	tests := []interface{} {
+		&struct {
+			S []struct {
+				I int
+				U uint
+			}
+		}{},
+	}
+
+	c, _ := parseConfig(node{
+		"s": []node{
+			node{
+				"i": 42,
+				"u": 23,
+			},
+			node{
+				"i": 41,
+				"u": 24,
+			},
+		},
+	})
+
+	for i, out := range tests {
+		t.Logf("test unpack config array (%v) into: %v", i, out)
+		err := c.Assemble(out)
+		if err != nil {
+			t.Fatalf("failed to unpack: %v", err)
+		}
+		t.Logf("test unpack config array (%v) into: %v", i, out)
 	}
 }
