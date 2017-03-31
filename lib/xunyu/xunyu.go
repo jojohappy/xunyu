@@ -22,10 +22,10 @@ type XunyuConfig struct {
 	Channels map[string]*config.Config `config:"channels"`
 }
 
-func Run() error {
+func Run(path string) error {
 	xy := newXunyu("")
 
-	if err := xy.configure(); err != nil {
+	if err := xy.configure(path); err != nil {
 		return err
 	}
 
@@ -58,8 +58,8 @@ func (xy *Xunyu) init() error {
 	return nil
 }
 
-func (xy *Xunyu) configure() error {
-	xy.Path = "/Users/michael/works/go/src/github.com/xunyu/config.json"
+func (xy *Xunyu) configure(path string) error {
+	xy.Path = path
 	cfg, err := config.Load(xy.Path)
 	if nil != err {
 		return err
