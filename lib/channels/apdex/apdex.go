@@ -47,7 +47,7 @@ func (ap *apdex) init(config *config.Config) error {
 	if err := config.Assemble(&ap.config); nil != err {
 		return err
 	}
-    initQueue()
+	initQueue()
 
 	return nil
 }
@@ -74,12 +74,11 @@ func (ap *apdex) Filter(out chan<- common.DataStr) error {
 
 func (ap *apdex) setupTimer(out chan<- common.DataStr) {
 	t := time.Now()
-    fmt.Println(t)
 	d := time.Second * 60
 	nextTime := t.Truncate(d).Add(time.Second * 60)
 	select {
 	case <-time.After(nextTime.Sub(t)):
-        ap.alert(out)
+		ap.alert(out)
 		ticker := time.NewTicker(time.Second * 60)
 		for range ticker.C {
 			ap.alert(out)
@@ -88,9 +87,9 @@ func (ap *apdex) setupTimer(out chan<- common.DataStr) {
 }
 
 func (*apdex) alert(out chan<- common.DataStr) {
-    queue := pop()
+	queue := pop()
 	for _, ar := range queue {
-        ar.SetApdex()
+		ar.SetApdex()
 		out <- ar.toDataStr()
 	}
 	close(out)
@@ -105,8 +104,6 @@ func (ap *apdex) filterRequest(req common.DataInter) error {
 
 	host := al.Host
 	requestTime := al.RequestTime * 1000
-
-    fmt.Printf("host:%s, request_time: %f, time: %s\n", al.Host, requestTime, al.Time.Truncate(time.Second*30))
 
 	rule, err := ap.fetchRule(host)
 	if nil != err {
@@ -124,7 +121,7 @@ func (ap *apdex) filterRequest(req common.DataInter) error {
 	}
 
 	ar = updateResult(rule, ar, requestTime)
-    updateQueue(idx, ar)
+	updateQueue(idx, ar)
 	return nil
 }
 

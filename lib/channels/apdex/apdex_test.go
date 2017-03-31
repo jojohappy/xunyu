@@ -1,9 +1,9 @@
 package apdex
 
 import (
+	"math/rand"
 	"testing"
 	"time"
-	"math/rand"
 
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
@@ -101,7 +101,7 @@ func TestApdexFilter(t *testing.T) {
 func filter(in <-chan common.DataInter) <-chan common.DataStr {
 	cfg, _ := genConfig()
 	ap, _ := New(cfg)
-	
+
 	out := make(chan common.DataStr, 1)
 
 	go func(ap common.Pluginer) {

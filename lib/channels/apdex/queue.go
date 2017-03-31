@@ -1,11 +1,11 @@
 package apdex
 
 import (
-    "fmt"
-    "strconv"
+	"fmt"
+	"strconv"
 	"time"
 
-    "github.com/xunyu/common"
+	"github.com/xunyu/common"
 )
 
 /*
@@ -31,10 +31,10 @@ access_log
 */
 
 type Accesslog struct {
-	Host         string    `json:"host"`
-	Time         time.Time `json:"time"`
-	Code         int       `json:"code"`
-	RequestTime  float64   `json:"request_time"`
+	Host        string    `json:"host"`
+	Time        time.Time `json:"time"`
+	Code        int       `json:"code"`
+	RequestTime float64   `json:"request_time"`
 }
 
 type ApdexResult struct {
@@ -81,27 +81,27 @@ func fetchResult(idx int, host string) (*ApdexResult, error) {
 }
 
 func pop() map[string]*ApdexResult {
-    q := queue[0]
-    queue = append(queue[:0], queue[1:]...)
-    queue = append(queue, make(map[string]*ApdexResult))
-    return q
+	q := queue[0]
+	queue = append(queue[:0], queue[1:]...)
+	queue = append(queue, make(map[string]*ApdexResult))
+	return q
 }
 
 func (ar *ApdexResult) SetApdex() {
-    total := float64(ar.SatisfiedCount + ar.ToleratingCount + ar.FrustratedCount)
-    if total == 0 {
-        ar.Apdex = 0
-        return
-    }
-    apdex := float64(ar.SatisfiedCount + ar.ToleratingCount / 2) / total
-    ar.Apdex, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", apdex), 64)
+	total := float64(ar.SatisfiedCount + ar.ToleratingCount + ar.FrustratedCount)
+	if total == 0 {
+		ar.Apdex = 0
+		return
+	}
+	apdex := float64(ar.SatisfiedCount+ar.ToleratingCount/2) / total
+	ar.Apdex, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", apdex), 64)
 }
 
 func (ar *ApdexResult) toDataStr() common.DataStr {
-    out := common.DataStr{
-        "Host": ar.Host,
-        "Time": ar.Time,
-        "Apdex": ar.Apdex,
-    }
-    return out
+	out := common.DataStr{
+		"Host":  ar.Host,
+		"Time":  ar.Time,
+		"Apdex": ar.Apdex,
+	}
+	return out
 }
