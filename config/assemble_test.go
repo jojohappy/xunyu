@@ -57,7 +57,7 @@ func TestAssembleConfigNested(t *testing.T) {
 				I *int
 				U *uint
 			}
-		}{S: &struct{
+		}{S: &struct {
 			I *int
 			U *uint
 		}{}},
@@ -82,7 +82,7 @@ func TestAssembleConfigNested(t *testing.T) {
 }
 
 func TestAssembleConfigSlice(t *testing.T) {
-	tests := []interface{} {
+	tests := []interface{}{
 		&struct {
 			S []struct {
 				I int

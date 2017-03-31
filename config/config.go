@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	dict map[string]value
-	arr []value
+	arr  []value
 }
 
 var (
@@ -128,7 +128,7 @@ func parseValue(v reflect.Value) (value, error) {
 	case reflect.String:
 		return newString(v.String()), nil
 	case reflect.Array, reflect.Slice:
-	    return parseSlice(v)
+		return parseSlice(v)
 	case reflect.Map:
 		return parseMapValue(v)
 	}
