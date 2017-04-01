@@ -58,7 +58,6 @@ func (ap *apdex) GetFilterChannel() chan<- common.DataInter {
 
 func (ap *apdex) Filter(out chan<- common.DataStr) error {
 	ap.c = make(chan common.DataInter, 1)
-	go ap.setupTimer(out)
 
 	go func() {
 		for req := range ap.c {
@@ -68,6 +67,7 @@ func (ap *apdex) Filter(out chan<- common.DataStr) error {
 			}
 		}
 	}()
+	go ap.setupTimer(out)
 
 	return nil
 }
@@ -75,11 +75,11 @@ func (ap *apdex) Filter(out chan<- common.DataStr) error {
 func (ap *apdex) setupTimer(out chan<- common.DataStr) {
 	t := time.Now()
 	d := time.Second * 60
-	nextTime := t.Truncate(d).Add(time.Second * 60)
+	nextTime := t.Truncate(d).Add(time.Second * 30)
 	select {
 	case <-time.After(nextTime.Sub(t)):
 		ap.alert(out)
-		ticker := time.NewTicker(time.Second * 60)
+		ticker := time.NewTicker(time.Second * 30)
 		for range ticker.C {
 			ap.alert(out)
 		}
@@ -92,7 +92,6 @@ func (*apdex) alert(out chan<- common.DataStr) {
 		ar.SetApdex()
 		out <- ar.toDataStr()
 	}
-	close(out)
 }
 
 func (ap *apdex) filterRequest(req common.DataInter) error {
