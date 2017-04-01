@@ -74,12 +74,12 @@ func (ap *apdex) Filter(out chan<- common.DataStr) error {
 
 func (ap *apdex) setupTimer(out chan<- common.DataStr) {
 	t := time.Now()
-	d := time.Second * 60
-	nextTime := t.Truncate(d).Add(time.Second * 30)
+	d := time.Second * 30
+	nextTime := t.Truncate(d).Add(d)
 	select {
 	case <-time.After(nextTime.Sub(t)):
 		ap.alert(out)
-		ticker := time.NewTicker(time.Second * 30)
+		ticker := time.NewTicker(d)
 		for range ticker.C {
 			ap.alert(out)
 		}
