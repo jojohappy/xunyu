@@ -139,8 +139,11 @@ func runOutput(outputs []common.Plugin, cs <-chan common.DataStr) {
 
 	output := func(p common.Plugin) {
 		defer wg.Done()
-		for data := range cs {
-			p.Plugin.Output(data)
+		for {
+			select {
+			case data := <-cs:
+				p.Plugin.Output(data)
+			}
 		}
 	}
 
