@@ -24,6 +24,7 @@ var (
 
 type file struct {
 	common.PluginPrototype
+	done chan struct{}
 	config FileConfig
 }
 
@@ -32,7 +33,10 @@ func init() {
 }
 
 func New(config *config.Config) (common.Pluginer, error) {
-	f := &file{config: defaultConfig}
+	f := &file{
+		config: defaultConfig,
+		done: make(chan struct{}),
+	}
 	if err := f.init(config); nil != err {
 		return nil, err
 	}
@@ -77,12 +81,19 @@ func (f *file) Start() <-chan common.DataInter {
 	}
 
 	go func() {
+		defer close(out)
 		for {
 			select {
 			case line := <-t.Lines:
 				out <- line.Text
+			case <-f.done:
+				return
 			}
 		}
 	}()
 	return out
+}
+
+func (f *file) Close() {
+	close(f.done)
 }

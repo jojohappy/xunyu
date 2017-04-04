@@ -21,6 +21,7 @@ type KafkaConfig struct {
 
 type kafka struct {
 	common.PluginPrototype
+	done chan struct{}
 	config KafkaConfig
 }
 
@@ -36,7 +37,10 @@ func init() {
 }
 
 func New(config *config.Config) (common.Pluginer, error) {
-	k := &kafka{config: defaultConfig}
+	k := &kafka{
+		config: defaultConfig,
+		done: make(chan struct{}),
+	}
 	if err := k.init(config); nil != err {
 		return nil, err
 	}
@@ -92,17 +96,23 @@ func (k *kafka) Start() <-chan common.DataInter {
 	}
 
 	go func() {
+		defer close(out)
 		for {
 			select {
 			case msg := <-consumer.Messages():
 				out <- string(msg.Value)
 				consumer.CommitUpto(msg)
+			case <-k.done:
+				if err := consumer.Close(); err != nil {
+					fmt.Printf("error closing the consumer %s\n", err)
+				}
+				return
 			}
 		}
 	}()
 	return out
 }
 
-func (*kafka) Close() error {
-	return nil
+func (k *kafka) Close() {
+	close(k.done)
 }
