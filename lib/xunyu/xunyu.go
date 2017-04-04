@@ -10,6 +10,7 @@ import (
 )
 
 type Xunyu struct {
+	done chan struct{}
 	Path    string
 	Config  XunyuConfig
 	Version string
@@ -43,6 +44,7 @@ func newXunyu(version string) *Xunyu {
 	}
 
 	return &Xunyu{
+		done: make(chan struct{}),
 		Version: version,
 	}
 }
@@ -55,6 +57,7 @@ func (xy *Xunyu) init() error {
 	}
 
 	xy.Plugins = p
+	HandleSignals(xy.Stop)
 	return nil
 }
 
@@ -73,14 +76,14 @@ func (xy *Xunyu) configure(path string) error {
 }
 
 func (xy *Xunyu) Run() error {
-	in := runInput(xy.Plugins.Inputs)
+	in := runInput(xy.done, xy.Plugins.Inputs)
 	ch := runChannel(xy.Plugins.Channels, in)
-	runOutput(xy.Plugins.Outputs, ch)
+	runOutput(xy.done, xy.Plugins.Outputs, ch)
 	return nil
 }
 
-func runInput(inputs []common.Plugin) <-chan common.DataInter {
-	fmt.Println("Starting Input")
+func runInput(done <-chan struct{}, inputs []common.Plugin) <-chan common.DataInter {
+	fmt.Println("starting Input")
 
 	out := make(chan common.DataInter, 1)
 
@@ -90,13 +93,20 @@ func runInput(inputs []common.Plugin) <-chan common.DataInter {
 		go func(p common.Plugin) {
 			defer wg.Done()
 			o := p.Plugin.Start()
-			for data := range o {
-				out <- data
+			for {
+				select {
+				case data := <-o:
+					out <- data
+				case <-done:
+					p.Plugin.Close()
+					return
+				}
 			}
 		}(p)
 	}
 
 	go func() {
+		defer fmt.Println("stopped Input")
 		wg.Wait()
 		close(out)
 	}()
@@ -105,7 +115,7 @@ func runInput(inputs []common.Plugin) <-chan common.DataInter {
 }
 
 func runChannel(channels []common.Plugin, in <-chan common.DataInter) <-chan common.DataStr {
-	fmt.Println("Starting Channel")
+	fmt.Println("starting Channel")
 
 	out := make(chan common.DataStr, 1)
 	var wg sync.WaitGroup
@@ -124,6 +134,7 @@ func runChannel(channels []common.Plugin, in <-chan common.DataInter) <-chan com
 	}
 
 	go func() {
+		defer fmt.Println("stopped Channel")
 		wg.Wait()
 		close(out)
 	}()
@@ -131,8 +142,8 @@ func runChannel(channels []common.Plugin, in <-chan common.DataInter) <-chan com
 	return out
 }
 
-func runOutput(outputs []common.Plugin, cs <-chan common.DataStr) {
-	fmt.Println("Starting Output")
+func runOutput(done <-chan struct{}, outputs []common.Plugin, cs <-chan common.DataStr) {
+	fmt.Println("starting Output")
 	defer fmt.Println("Stopped Output")
 
 	var wg sync.WaitGroup
@@ -143,6 +154,8 @@ func runOutput(outputs []common.Plugin, cs <-chan common.DataStr) {
 			select {
 			case data := <-cs:
 				p.Plugin.Output(data)
+			case <-done:
+				return
 			}
 		}
 	}
@@ -153,4 +166,8 @@ func runOutput(outputs []common.Plugin, cs <-chan common.DataStr) {
 	}
 
 	wg.Wait()
+}
+
+func (xy *Xunyu) Stop() {
+	close(xy.done)
 }
