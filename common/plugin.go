@@ -5,7 +5,7 @@ import (
 )
 
 type Pluginer interface {
-	Close() error
+	Close()
 	Start() <-chan DataInter
 	Output(data DataStr) error
 	Filter(out chan<- DataStr) error
@@ -109,9 +109,7 @@ func (*PluginPrototype) Start() <-chan DataInter {
 	return nil
 }
 
-func (*PluginPrototype) Close() error {
-	return nil
-}
+func (*PluginPrototype) Close() {}
 
 func (*PluginPrototype) Output(data DataStr) error {
 	return nil
