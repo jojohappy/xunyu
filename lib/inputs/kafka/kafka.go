@@ -21,7 +21,7 @@ type KafkaConfig struct {
 
 type kafka struct {
 	common.PluginPrototype
-	done chan struct{}
+	done   chan struct{}
 	config KafkaConfig
 }
 
@@ -39,7 +39,7 @@ func init() {
 func New(config *config.Config) (common.Pluginer, error) {
 	k := &kafka{
 		config: defaultConfig,
-		done: make(chan struct{}),
+		done:   make(chan struct{}),
 	}
 	if err := k.init(config); nil != err {
 		return nil, err

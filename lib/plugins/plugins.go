@@ -5,8 +5,8 @@ import (
 	"github.com/xunyu/config"
 
 	// load support channels
-	_ "github.com/xunyu/lib/channels/json"
 	_ "github.com/xunyu/lib/channels/apdex"
+	_ "github.com/xunyu/lib/channels/json"
 
 	// load support inputs
 	_ "github.com/xunyu/lib/inputs/file"

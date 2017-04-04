@@ -24,7 +24,7 @@ var (
 
 type file struct {
 	common.PluginPrototype
-	done chan struct{}
+	done   chan struct{}
 	config FileConfig
 }
 
@@ -35,7 +35,7 @@ func init() {
 func New(config *config.Config) (common.Pluginer, error) {
 	f := &file{
 		config: defaultConfig,
-		done: make(chan struct{}),
+		done:   make(chan struct{}),
 	}
 	if err := f.init(config); nil != err {
 		return nil, err

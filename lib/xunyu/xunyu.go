@@ -10,7 +10,7 @@ import (
 )
 
 type Xunyu struct {
-	done chan struct{}
+	done    chan struct{}
 	Path    string
 	Config  XunyuConfig
 	Version string
@@ -44,7 +44,7 @@ func newXunyu(version string) *Xunyu {
 	}
 
 	return &Xunyu{
-		done: make(chan struct{}),
+		done:    make(chan struct{}),
 		Version: version,
 	}
 }
