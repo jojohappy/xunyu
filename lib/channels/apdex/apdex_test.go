@@ -59,7 +59,7 @@ func genInput() <-chan common.DataInter {
 	go func() {
 		t := time.Now()
 		for j := 0; j < len(testRequest); j++ {
-			rn := rand.Intn(45) * -1
+			rn := rand.Intn(30) * -1
 			newT := t.Add(time.Second * time.Duration(rn))
 			s := testRequest[j] + ",\"time\":\"" + newT.Format(time.RFC3339) + "\"}"
 			in <- s
@@ -85,7 +85,6 @@ func TestApdexConfig(t *testing.T) {
 }
 
 func TestApdexFilter(t *testing.T) {
-	done := make(chan bool)
 	in := genInput()
 	out := filter(in)
 
@@ -93,9 +92,8 @@ func TestApdexFilter(t *testing.T) {
 		for data := range out {
 			t.Logf("test apdex filter message: %v", data)
 		}
-		done <- true
 	}()
-	<-done
+	<-time.After(time.Second * 30)
 }
 
 func filter(in <-chan common.DataInter) <-chan common.DataStr {
