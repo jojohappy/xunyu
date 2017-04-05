@@ -67,7 +67,7 @@ func testLog(cfg *config.Config, t *testing.T) {
 		t.Error(err)
 	}
 
-	Err("test %s", "test1")
+	Error("test %s", "test1")
 
 	content, err := ioutil.ReadFile(_log.config.File)
 	if nil != err {

@@ -109,7 +109,7 @@ func Warn(format string, v ...interface{}) {
 	marked(LOG_WARNING, "WARNING ", format, v...)
 }
 
-func Err(format string, v ...interface{}) {
+func Error(format string, v ...interface{}) {
 	marked(LOG_ERR, "ERROR ", format, v...)
 }
 
