@@ -6,6 +6,7 @@ import (
 
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
+	"github.com/xunyu/lib/log"
 	"github.com/xunyu/lib/plugins"
 )
 
@@ -21,6 +22,7 @@ type XunyuConfig struct {
 	Inputs   map[string]*config.Config `config:"inputs"`
 	Outputs  map[string]*config.Config `config:"outputs"`
 	Channels map[string]*config.Config `config:"channels"`
+	Logger   config.Config             `config:"logger"`
 }
 
 func Run(path string) error {
@@ -58,6 +60,7 @@ func (xy *Xunyu) init() error {
 
 	xy.Plugins = p
 	HandleSignals(xy.Stop)
+	log.InitLog(&xy.Config.Logger)
 	return nil
 }
 
