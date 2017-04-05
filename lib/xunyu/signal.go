@@ -1,11 +1,12 @@
 package xunyu
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/xunyu/lib/log"
 )
 
 func HandleSignals(stopFunc func()) {
@@ -15,7 +16,7 @@ func HandleSignals(stopFunc func()) {
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sigc
-		fmt.Println("received sigterm/sigin, stopping")
+		log.Info("received sigterm/sigin, stopping")
 		once.Do(stopFunc)
 	}()
 }

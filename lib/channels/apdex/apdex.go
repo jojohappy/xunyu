@@ -3,11 +3,11 @@ package apdex
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
+	"github.com/xunyu/lib/log"
 )
 
 type ApdexRule struct {
@@ -63,7 +63,7 @@ func (ap *apdex) Filter(out chan<- common.DataStr) error {
 		for req := range ap.c {
 			err := ap.filterRequest(req)
 			if nil != err {
-				fmt.Println(err)
+				log.Debug("error on filtering request: %s", err)
 			}
 		}
 	}()

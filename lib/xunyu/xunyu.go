@@ -1,7 +1,6 @@
 package xunyu
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/xunyu/common"
@@ -52,6 +51,7 @@ func newXunyu(version string) *Xunyu {
 }
 
 func (xy *Xunyu) init() error {
+	log.InitLog(&xy.Config.Logger)
 	p, err := plugins.LoadPlugins(xy.Config.Inputs, xy.Config.Outputs, xy.Config.Channels)
 
 	if nil != err {
@@ -60,7 +60,6 @@ func (xy *Xunyu) init() error {
 
 	xy.Plugins = p
 	HandleSignals(xy.Stop)
-	log.InitLog(&xy.Config.Logger)
 	return nil
 }
 
@@ -86,7 +85,7 @@ func (xy *Xunyu) Run() error {
 }
 
 func runInput(done <-chan struct{}, inputs []common.Plugin) <-chan common.DataInter {
-	fmt.Println("starting Input")
+	log.Info("starting Input")
 
 	out := make(chan common.DataInter, 1)
 
@@ -109,7 +108,7 @@ func runInput(done <-chan struct{}, inputs []common.Plugin) <-chan common.DataIn
 	}
 
 	go func() {
-		defer fmt.Println("stopped Input")
+		defer log.Info("stopped Input")
 		wg.Wait()
 		close(out)
 	}()
@@ -118,7 +117,7 @@ func runInput(done <-chan struct{}, inputs []common.Plugin) <-chan common.DataIn
 }
 
 func runChannel(channels []common.Plugin, in <-chan common.DataInter) <-chan common.DataStr {
-	fmt.Println("starting Channel")
+	log.Info("starting Channel")
 
 	out := make(chan common.DataStr, 1)
 	var wg sync.WaitGroup
@@ -137,7 +136,7 @@ func runChannel(channels []common.Plugin, in <-chan common.DataInter) <-chan com
 	}
 
 	go func() {
-		defer fmt.Println("stopped Channel")
+		defer log.Info("stopped Channel")
 		wg.Wait()
 		close(out)
 	}()
@@ -146,8 +145,8 @@ func runChannel(channels []common.Plugin, in <-chan common.DataInter) <-chan com
 }
 
 func runOutput(done <-chan struct{}, outputs []common.Plugin, cs <-chan common.DataStr) {
-	fmt.Println("starting Output")
-	defer fmt.Println("Stopped Output")
+	log.Info("starting Output")
+	defer log.Info("stopped Output")
 
 	var wg sync.WaitGroup
 

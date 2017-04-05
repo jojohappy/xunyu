@@ -1,10 +1,9 @@
 package file
 
 import (
-	"fmt"
-
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
+	"github.com/xunyu/lib/log"
 
 	"github.com/hpcloud/tail"
 )
@@ -68,14 +67,14 @@ func (f *file) Start() <-chan common.DataInter {
 	out := make(chan common.DataInter, 1)
 	cfg, err := f.newTailConfig()
 	if nil != err {
-		fmt.Println(err)
+		log.Debug("error on creating config of inputs file: %s", err)
 		close(out)
 		return out
 	}
 
 	t, err := tail.TailFile(f.config.Path, cfg)
 	if nil != err {
-		fmt.Println(err)
+		log.Debug("error on creating instance of tail: %s", err)
 		close(out)
 		return out
 	}

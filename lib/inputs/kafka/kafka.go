@@ -1,11 +1,11 @@
 package kafka
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/xunyu/common"
 	"github.com/xunyu/config"
+	"github.com/xunyu/lib/log"
 
 	"github.com/Shopify/sarama"
 	"github.com/wvanbergen/kafka/consumergroup"
@@ -52,7 +52,7 @@ func (k *kafka) init(config *config.Config) error {
 		return err
 	}
 
-	fmt.Println(k.config)
+	log.Debug("config of inputs kafka is %v", k.config)
 
 	if _, err := k.newKafkaConfig(); nil != err {
 		return err
@@ -82,7 +82,7 @@ func (k *kafka) Start() <-chan common.DataInter {
 	cfg, err := k.newKafkaConfig()
 
 	if nil != err {
-		fmt.Println(err)
+		log.Error("error on creating config of inputs kafka: %s", err)
 		close(out)
 		return out
 	}
@@ -90,7 +90,7 @@ func (k *kafka) Start() <-chan common.DataInter {
 	consumer, err := newKafkaClient(cfg, k.config.Zookeeper, k.config.Topics, k.config.GroupId)
 
 	if nil != err {
-		fmt.Println(err)
+		log.Error("error on creating kafka client: %s", err)
 		close(out)
 		return out
 	}
@@ -104,7 +104,7 @@ func (k *kafka) Start() <-chan common.DataInter {
 				consumer.CommitUpto(msg)
 			case <-k.done:
 				if err := consumer.Close(); err != nil {
-					fmt.Printf("error closing the consumer %s\n", err)
+					log.Error("error closing the consumer %s", err)
 				}
 				return
 			}

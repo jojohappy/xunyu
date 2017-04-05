@@ -2,6 +2,7 @@ package common
 
 import (
 	"github.com/xunyu/config"
+	"github.com/xunyu/lib/log"
 )
 
 type Pluginer interface {
@@ -52,7 +53,7 @@ func InitPlugin(
 	plugins := &Plugins{}
 	for _, name := range catagorys {
 		pb := getPlugins(name)
-		p, err := doInitPlugin(pb, configs[name])
+		p, err := doInitPlugin(name, pb, configs[name])
 		if nil != err {
 			return nil, err
 		}
@@ -62,6 +63,7 @@ func InitPlugin(
 }
 
 func doInitPlugin(
+	catagory string,
 	pb map[string]PluginBuilder,
 	cfg map[string]*config.Config,
 ) (plugins []Plugin, err error) {
@@ -70,6 +72,7 @@ func doInitPlugin(
 		if !ok {
 			continue
 		}
+		log.Info("load %s plugin %s", catagory, name)
 		p, err := builder(c)
 		if nil != err {
 			return nil, err
