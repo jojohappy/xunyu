@@ -1,0 +1,15 @@
+[Unit]
+Description=Xunyu for Golang
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/data/www-data/xunyu
+ExecStart=/data/www-data/xunyu/xunyu -config=./config.json
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
