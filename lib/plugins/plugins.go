@@ -15,6 +15,7 @@ import (
 	// load support outputs
 	// _ "github.com/xunyu/outputs/elasticsearch"
 	_ "github.com/xunyu/lib/outputs/console"
+	_ "github.com/xunyu/lib/outputs/zabbix"
 )
 
 func LoadPlugins(
