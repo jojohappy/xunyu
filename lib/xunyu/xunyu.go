@@ -21,7 +21,7 @@ type XunyuConfig struct {
 	Inputs   map[string]*config.Config `config:"inputs"`
 	Outputs  map[string]*config.Config `config:"outputs"`
 	Channels map[string]*config.Config `config:"channels"`
-	Logger   config.Config             `config:"logger"`
+	Logger   *config.Config            `config:"logger"`
 }
 
 func Run(path string) error {
@@ -51,7 +51,7 @@ func newXunyu(version string) *Xunyu {
 }
 
 func (xy *Xunyu) init() error {
-	log.InitLog(&xy.Config.Logger)
+	log.InitLog(xy.Config.Logger)
 	p, err := plugins.LoadPlugins(xy.Config.Inputs, xy.Config.Outputs, xy.Config.Channels)
 
 	if nil != err {
