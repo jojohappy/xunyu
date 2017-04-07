@@ -13,5 +13,8 @@
   "channels": {
     "json": {
     }
+  },
+  "logger": {
+    "file": "/xunyu/logs/xunyu.log"
   }
 }
